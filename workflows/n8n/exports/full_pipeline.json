@@ -1,0 +1,280 @@
+{
+  "name": "AutoApply Full Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 60
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger-1",
+      "name": "Cron Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://localhost:3000/api/jobs/fetch",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-jobs-1",
+      "name": "Fetch Jobs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        430,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/jd/analyze",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"jobId\": $json.id,\n  \"description\": $json.description\n}",
+        "options": {}
+      },
+      "id": "analyze-jd-1",
+      "name": "Analyze JD",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const skillMatch = Number($json.skillMatch ?? 0);\nconst keywordMatch = Number($json.keywordMatch ?? 0);\nconst roleMatch = Number($json.roleMatch ?? 0);\nconst score = Math.round((skillMatch * 0.5) + (keywordMatch * 0.3) + (roleMatch * 0.2));\nreturn [{ json: { ...$json, score } }];"
+      },
+      "id": "score-job-1",
+      "name": "Score Job",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        890,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.score}}",
+              "operation": "larger",
+              "value2": 70
+            }
+          ]
+        }
+      },
+      "id": "if-score-1",
+      "name": "IF score > 70",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/resume/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"jobId\": $json.jobId || $json.id,\n  \"jobDescription\": $json.description,\n  \"analysis\": $json\n}",
+        "options": {}
+      },
+      "id": "generate-resume-1",
+      "name": "Generate Resume",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        210
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/cover-letter/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"jobId\": $json.jobId || $json.id,\n  \"jobDescription\": $json.description,\n  \"analysis\": $json\n}",
+        "options": {}
+      },
+      "id": "generate-cover-letter-1",
+      "name": "Generate Cover Letter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1590,
+        210
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/pdf/compile",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"jobId\": $json.jobId || $json.id,\n  \"resumeTexPath\": $json.resumeTexPath\n}",
+        "options": {}
+      },
+      "id": "compile-pdf-1",
+      "name": "Compile PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1820,
+        210
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO job_applications (company, role, score, status, resume_path, applied_at)\nVALUES ($1, $2, $3, $4, $5, NOW())\nRETURNING id;",
+        "options": {
+          "queryReplacement": "={{[$json.company, $json.role || $json.title, $json.score, 'ready_to_apply', $json.pdfPath || $json.resumePdfPath]}}"
+        }
+      },
+      "id": "save-result-1",
+      "name": "Save Result",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2050,
+        210
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1",
+          "name": "Postgres tracking DB"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Jobs": {
+      "main": [
+        [
+          {
+            "node": "Analyze JD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze JD": {
+      "main": [
+        [
+          {
+            "node": "Score Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Job": {
+      "main": [
+        [
+          {
+            "node": "IF score > 70",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF score > 70": {
+      "main": [
+        [
+          {
+            "node": "Generate Resume",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Generate Resume": {
+      "main": [
+        [
+          {
+            "node": "Generate Cover Letter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Cover Letter": {
+      "main": [
+        [
+          {
+            "node": "Compile PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile PDF": {
+      "main": [
+        [
+          {
+            "node": "Save Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "autoapply-instance"
+  },
+  "id": "autoapply-full-pipeline",
+  "tags": []
+}

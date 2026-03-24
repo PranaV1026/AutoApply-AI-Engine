@@ -1,0 +1,14 @@
+{
+  "name": "@autoapply/tracking",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PostgreSQL tracking functions for job applications",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "node --check src/index.js && node --check src/db.js && node --check src/jobApplicationRepository.js"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  }
+}

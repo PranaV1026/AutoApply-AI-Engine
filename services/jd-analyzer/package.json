@@ -1,0 +1,14 @@
+{
+  "name": "@autoapply/jd-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Analyze job descriptions with OpenAI and return consistent JSON",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "node --check src/index.js && node --check src/analyzeJobDescription.js && node --check src/scoring/matchers.js && node --check src/scoring/calculateRelevanceScore.js"
+  },
+  "dependencies": {
+    "openai": "^4.104.0"
+  }
+}
