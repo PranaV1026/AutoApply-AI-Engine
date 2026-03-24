@@ -7,33 +7,6 @@ See `docs/architecture/FOLDER_STRUCTURE.md` for the full tree and folder-by-fold
 
 Production-grade system to scrape jobs, analyze fit, generate tailored application documents, and optionally automate application submission.
 
-## Quickstart (One-Command Local Stack)
-
-This repo now includes a root `docker-compose.yml` + `Makefile` for a faster local bootstrap.
-
-1. Copy env template:
-   ```bash
-   cp .env.example .env
-   ```
-2. Start PostgreSQL + n8n:
-   ```bash
-   make up
-   ```
-3. (Optional) Re-apply migration manually:
-   ```bash
-   make migrate
-   ```
-4. Open n8n:
-   - `http://localhost:5678`
-
-Helpful commands:
-- `make ps`
-- `make logs`
-- `make down`
-- `make install-all`
-- `make lint-all`
-
-
 ## 1) High-Level Architecture
 
 ```text
