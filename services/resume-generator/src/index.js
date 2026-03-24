@@ -1,11 +1,9 @@
 const fs = require('fs/promises');
 const path = require('path');
 const { generateTailoredResume } = require('./generateTailoredResume');
-const { renderLatexResume } = require('./renderLatexResume');
 
 module.exports = {
-  generateTailoredResume,
-  renderLatexResume
+  generateTailoredResume
 };
 
 async function readJsonFile(filePath) {

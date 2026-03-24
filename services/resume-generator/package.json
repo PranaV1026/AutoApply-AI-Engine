@@ -6,8 +6,7 @@
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
-    "lint": "node --check src/index.js && node --check src/generateTailoredResume.js && node --check src/renderLatexResume.js && node --check src/renderLatexCli.js",
-    "render:tex": "node src/renderLatexCli.js"
+    "lint": "node --check src/index.js && node --check src/generateTailoredResume.js"
   },
   "dependencies": {
     "openai": "^4.104.0"
