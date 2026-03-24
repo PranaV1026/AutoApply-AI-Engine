@@ -1,0 +1,12 @@
+{
+  "name": "Alex Doe",
+  "skills": ["Node.js", "PostgreSQL", "System Design"],
+  "experience": [
+    "Built scalable APIs handling 2M+ requests/day",
+    "Reduced p95 latency by 35% via query optimization"
+  ],
+  "projects": [
+    "AutoApply Engine: built workflow orchestration with n8n",
+    "Resume Pipeline: generated ATS-ready resumes with OpenAI"
+  ]
+}
