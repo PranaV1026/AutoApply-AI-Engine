@@ -1,0 +1,17 @@
+{
+  "name": "@autoapply/orchestrator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express API server for AutoApply pipeline orchestration",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "lint": "node --check src/server.js && node --check src/app.js && node --check src/config/env.js && node --check src/middleware/logger.js && node --check src/middleware/errorHandler.js && node --check src/routes/index.js && node --check src/routes/jobs.js && node --check src/routes/jd.js && node --check src/routes/resume.js && node --check src/routes/pdf.js && node --check src/routes/apply.js && node --check src/services/jobsService.js && node --check src/services/jdService.js && node --check src/services/resumeService.js && node --check src/services/pdfService.js && node --check src/services/applyService.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  }
+}
